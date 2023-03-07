@@ -14,6 +14,7 @@ const MongoStore = require('connect-mongo')
 const connectDB = require('./config/db.js')
 const axios = require('axios')
 const PORT = process.env.PORT || 8080
+const cors = require('cors');
 
 // Load config
 dotenv.config({ path: '.env' })
@@ -30,11 +31,12 @@ if (process.env.NODE_ENV === 'development') {
   }
 
 
-app.use(express.json())
+
+app.use(express.json({ extended: false }));
 
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname + '/public')))
-
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -64,6 +66,11 @@ app.use(function(req, res, next) {
 });
 
 app.get('/', (req, res) => res.send('Hello Smokey'))
+
+// Routes
+app.use('/', require('./routes/index.js'))
+app.use('/users', require('./routes/users.js'))
+app.use('/auth', require('./routes/auth.js'))
 
 
 app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`))
