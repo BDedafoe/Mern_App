@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { ensureAuthenticated, forwardAuthenticated } = require('../middleware/auth');
+const { ensureAuthenticated, forwardAuthenticated } = require('../src/middleware/auth');
 
 // Welcome Page
 router.get('/', forwardAuthenticated, (req, res) => res.render('welcome'));

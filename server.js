@@ -1,26 +1,28 @@
 const express = require('express')
 const app = express()
-const dotenv = require('dotenv')
-const passport = require('passport')
+const PORT = process.env.PORT || 8000
 const path = require('path')
-const bodyParser = require('body-parser')
+const bodyParser = require("body-parser")
+const dotenv = require('dotenv')
+const bcrypt = require('bcryptjs')
+const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
 const morgan = require('morgan')
-const cookieParser = require('cookie-parser')
 const mongoose = require('mongoose')
+const connectDB = require('./src/config/db')
 const MongoStore = require('connect-mongo')
-const connectDB = require('./config/db.js')
+const cookieParser = require("cookie-parser");
 const axios = require('axios')
-const PORT = process.env.PORT || 8080
 const cors = require('cors');
-
+const User = require('./src/models/User')
+const expressLayouts = require('express-ejs-layouts')
 // Load config
 dotenv.config({ path: '.env' })
 
 // Passport Config
-require('./config/passport')
+require('./src/config/passport')
 
 // Database connection
 connectDB()
@@ -30,13 +32,14 @@ if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'))
   }
 
+  app.use(cors({ origin: true, credentials: true }));
 
-
+// Init Middleware
 app.use(express.json({ extended: false }));
-
+app.use(expressLayouts)
 app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname + '/public')))
-app.use(cors({ origin: true, credentials: true }));
+app.use(express.static(path.join(__dirname, 'views/js')))
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -48,6 +51,8 @@ app.use(session({
   saveUninitialized: true,
   store: MongoStore.create({ mongoUrl: process.env.MONGO_URI })
 }))
+
+
 
 
 
@@ -65,12 +70,20 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.get('/', (req, res) => res.send('Hello Smokey'))
+
 
 // Routes
 app.use('/', require('./routes/index.js'))
-app.use('/users', require('./routes/users.js'))
+const user = ('/users', require('./routes/users.js'))
 app.use('/auth', require('./routes/auth.js'))
 
+app.use('/users', user);
 
-app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`))
+
+    const server = app.listen(8000, () => {
+        console.log("server listening on port 8000");
+    });
+
+
+
+

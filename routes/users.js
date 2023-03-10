@@ -4,8 +4,8 @@ const bcrypt = require('bcryptjs');
 const router = express.Router()
 
 // Load User model
-const User = require('../models/User');
-const { forwardAuthenticated } = require('../middleware/auth');
+const User = require('../src/models/User');
+const { forwardAuthenticated } = require('../src/middleware/auth');
 
 // Login Page
 router.get('/login', forwardAuthenticated, (req, res) => res.render('login'));
@@ -15,15 +15,16 @@ router.get('/register', forwardAuthenticated, (req, res) => res.render('register
 
 // Register
 router.post('/register', (req, res) => {
-  const { firstName, lastName, email, password, password2 } = req.body;
+  const { firstName, lastName, email, password, password2 } = User.create(req.body)
+  
   let errors = [];
 
   if (!firstName ||!lastName ||!email || !password || !password2) {
-    errors.push({ msg: 'Please enter all fields' });
+    message.innerHTML="Please enter all fields.";
   }
 
   if (password != password2) {
-    errors.push({ msg: 'Passwords do not match' });
+    console.log('Passwords do not match');
   }
 
   if (password.length < 6) {
@@ -98,38 +99,6 @@ router.get('/logout', (req, res) => {
   });
 });
 
-const addGoogleUser =
-  (User) =>
-  ({ id, email, firstName, lastName, profilePhoto }) => {
-    const user = new User({
-      id,
-      email,
-      firstName,
-      lastName,
-      profilePhoto,
-      source: "google",
-    });
-    return user.save();
-  };
 
-const getUsers = (User) => () => {
-  return User.find({});
-};
-
-const getUserByEmail =
-  (User) =>
-  async ({ email }) => {
-    return await User.findOne({
-      email,
-    });
-  };
-
-module.exports = (User) => {
-  return {
-    addGoogleUser: addGoogleUser(User),
-    getUsers: getUsers(User),
-    getUserByEmail: getUserByEmail(User),
-  };
-};
 
 module.exports = router;
